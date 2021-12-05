@@ -1,3 +1,22 @@
+/************************************************************************
+ Program:       Encryption Coding
+ Author:        Randall Rowland (https://github.com/rowland007)
+ Class:         CS-405-T2676 Secure Coding 21EW2
+ Instructor:    Mr. Trevor Hodde
+ Date:          2021-12-3
+ Description:   A large banking web application is implementing encryption
+                as a best practice in the SDLC and this is a POC.
+ Input:         File: <inputdatafile.txt>
+ Output:        File: <encrypteddatafile.txt>
+                File: <decrytpteddatafile.txt>
+ Known bugs:    Don't roll your own encryption kids...
+ Missing features:
+ License:       Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
+ Modifications:
+   Date                      Comment
+ ---------   ------------------------------------------------
+ 2021DEC05   Added Chrono fuctions to get the timestamp (requires use of C++20)
+ ************************************************************************/
 // Encryption.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
 
@@ -7,6 +26,23 @@
 #include <iostream>
 #include <sstream>
 #include <ctime>
+#include <chrono>
+
+std::string getCurrentTimestamp() {
+    // make timestamp (yyyy-mm-dd)
+    // This function uses C++ 20 and needs /std::c++latest enabled
+    // in Visual Studio 2019's project properties
+    const std::chrono::time_point<std::chrono::system_clock> now{
+        std::chrono::system_clock::now()
+    };
+    const std::chrono::year_month_day ymd{
+        std::chrono::floor<std::chrono::days>(now)
+    };
+
+    std::stringstream s;
+    s << std::format("{:0>4}", static_cast<int>(ymd.year())) << "-" << std::format("{:0>2}", static_cast<unsigned>(ymd.month())) << "-" << std::format("{:0>2}", static_cast<unsigned>(ymd.day()));
+    return s.str();
+}
 
 /// <summary>
 /// encrypt or decrypt a source string using the provided key
@@ -29,9 +65,9 @@ std::string encrypt_decrypt(const std::string& source, const std::string& key)
 
   // loop through the source string char by char
   for (size_t i = 0; i < source_length; ++i)
-  { // TODO: student need to change the next line from output[i] = source[i]
+  { // student need to change the next line from output[i] = source[i]
     // transform each character based on an xor of the key modded constrained to key length using a mod
-    output[i] = source[i];
+    output[i] = source[i] ^ key[i % key_length];
   }
 
   // our output length must equal our source length
@@ -43,9 +79,26 @@ std::string encrypt_decrypt(const std::string& source, const std::string& key)
 
 std::string read_file(const std::string& filename)
 {
-  std::string file_text = "John Q. Smith\nThis is my test string";
+  std::string file_text = "Randall Rowland\nThis is my test string";
 
-  // TODO: implement loading the file into a string
+  // implement loading the file into a string
+  try {
+      // Use try block to "open" the file
+      std::ifstream inFile(filename);
+      std::stringstream stringStream;
+
+      // Try to read from the file
+      stringStream << inFile.rdbuf();
+
+      // Add the file contents to the string
+      file_text = stringStream.str();
+
+      // close the file
+      inFile.close();
+  }
+  catch (const std::exception& e) {
+      std::cerr << "ERROR in read_file!\nIssue: " << e.what() << std::endl;
+  }
 
   return file_text;
 }
@@ -67,12 +120,27 @@ std::string get_student_name(const std::string& string_data)
 
 void save_data_file(const std::string& filename, const std::string& student_name, const std::string& key, const std::string& data)
 {
-  //  TODO: implement file saving
-  //  file format
-  //  Line 1: student name
-  //  Line 2: timestamp (yyyy-mm-dd)
-  //  Line 3: key used
-  //  Line 4+: data
+    //  implement file saving
+    //  file format
+    //  Line 1: student name
+    //  Line 2: timestamp (yyyy-mm-dd)
+    //  Line 3: key used
+    //  Line 4+: data
+
+    const std::string timestamp = getCurrentTimestamp();
+
+    try {
+        std::ofstream outFile(filename);
+        outFile << student_name << std::endl;
+        outFile << timestamp << std::endl;
+        outFile << key << std::endl;
+        outFile << data << std::endl;
+
+        outFile.close();
+    }
+    catch (const std::exception& e) {
+        std::cerr << "ERROR in save_data_file!\nIssue: " << e.what() << std::endl;
+    }
 }
 
 int main()
