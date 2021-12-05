@@ -24,3 +24,7 @@ Specifically, you will need to complete the following:
 - **Data Files**: Create an original data file in the specified data format, produce the encrypted and decrypted data files, and ensure all file names match the source code defined file names.
 - **C/C++ Program Functionality and Best Practices**: Demonstrate industry standard best practices, including in-line comments and appropriate naming conventions to enhance readability of code. Develop functional C/C++ code that illustrates a software design pattern approach.
 - **Process Summary**: Provide a summary of the debugging that is thorough and systematic, including specific types of bugs, and accurately describe the corrections.
+
+# Build instructions
+
+The timestamp functions require the use of the `chrono` header and the use of `C++ 20`. To enable the features on Visual Studio, choose `/std::c++latest` to ensure the compiler will build the code without errors.
